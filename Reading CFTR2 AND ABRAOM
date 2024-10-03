@@ -1,0 +1,64 @@
+install.packages("readxl")
+install.packages("dplyr")
+install.packages("openxlsx")
+library(openxlsx)
+library(readxl)
+library(dplyr)
+
+
+gnomad_cftr <- read_excel("cftr_gnomad2.xlsx")
+cftr2 <- read_excel("CFTR2_2023.xlsx")
+
+variantes_comuns <- inner_join(gnomad_cftr, cftr2, by = "Variant Id")
+
+write.xlsx(variantes_comuns, "comuns_cftr2_gnomad.xlsx")
+
+
+merge <- read_excel("comuns_cftr2_gnomad.xlsx")
+nativos <- read_excel("variantes_indigenas.xlsx")
+
+nativos_cftr_gnomad <- inner_join(merge, nativos, by = "Position")
+
+
+abraom <- read_excel("ABraOM_cftr.xlsx")
+write.xlsx(abraom, "abraom_cftr_planilha.xlsx")
+
+
+abraom_cftr <- inner_join(variantes_comuns, abraom, by = "Position")
+write.xlsx(abraom_cftr, "abraom.xlsx")
+
+
+#cftr gnomad_abraom
+
+gnomad_abraom <- inner_join(gnomad_cftr, abraom, by = "Position")
+write.xlsx(gnomad_abraom, "abraom_gnomad.xlsx")
+
+
+#cftr 2_abraom
+
+cftr2_abraom <- inner_join(cftr2, abraom, by = "Variant legacy name")
+cftr_2_abraom <- na.omit(cftr2_abraom)
+
+write.xlsx(cftr_2_abraom, "cftr2_abraom.xlsx")
+
+#cftr2_nativos
+
+indigenas <- read_excel("indigenas_ensembl.xlsx")
+cftr2_nativos <- inner_join(cftr2, indigenas, by = "Variant protein name")
+
+
+#renomeando colunas cftr2_abrahom
+
+names(cftr_2_abraom)[names(cftr_2_abraom) == "dbSNP150"] <- "rsIDs"
+
+#dados entre cftr2_abraom
+
+resultado_full <- merge(cftr_2_abraom,abraom_cftr, by = "rsIDs", all = TRUE)
+write.xlsx(resultado_full, "cftr2abraomgnomad.xlsx")
+
+#abraom e indigenas
+
+abraom_nativos <- inner_join(abraom, indigenas, by = "Position")
+write.xlsx(abraom_nativos, "abraom_nativos.xlsx")
+
+
