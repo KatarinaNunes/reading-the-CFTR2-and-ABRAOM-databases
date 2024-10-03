@@ -1,0 +1,64 @@
+library(readxl)
+allele_freq <- read_excel("cq_indigenas_cftr.xlsx")
+
+colnames(allele_freq) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "ALLELE1_FREQ", "ALLELE2_FREQ")
+
+
+allele_freq$ALLELE1_FREQ <- as.numeric(sub(".*:", "", allele_freq$ALLELE1_FREQ))
+allele_freq$ALLELE2_FREQ <- as.numeric(sub(".*:", "", allele_freq$ALLELE2_FREQ))
+
+allele_freq$MAF <- pmin(allele_freq$ALLELE1_FREQ, allele_freq$ALLELE2_FREQ)
+
+no_NA <- na.omit(allele_freq)
+
+
+head(no_NA)
+
+
+no_NA$Category <- cut(no_NA$MAF,
+                            breaks = c(-Inf,0.001,0.01,Inf),
+                            labels = c("muito raro", "raro", "comum"))
+
+print(no_NA)
+
+
+library(readxl)
+freq <- read_excel("cq_indigenas_cftr.xlsx")
+
+colnames(freq) <- c("CHROM", "POS", "N_ALLELES", "N_CHR", "ALLELE1_FREQ", "ALLELE2_FREQ")
+freq$MAF <- apply(freq[, c(5,6)], 1, min)
+freq$MAF <- as.numeric(gsub("[^0-9.]", "", freq$MAF))
+remove_NA <- na.omit(freq)
+
+write.table(freq, "MAF_output.txt", row.names = FALSE, quote = FALSE)
+library(openxlsx)
+write.xlsx(freq, "MAF_excel_filter.xlsx")
+
+
+remove_NA$Category <- cut(remove_NA$MAF,
+                      breaks = c(-Inf,0.001,0.01,Inf),
+                      labels = c("muito raro", "raro", "comum"))
+
+print(no_NA)
+
+print(p)
+
+#dados do plink de frq alelica
+
+frequencias <- read.table("frequencia_map.frq", header = TRUE, stringsAsFactors = FALSE)
+
+-> Retirada de dados ausentes
+
+frq_sem_NA <- na.omit(frequencias)
+raras <- subset(frq_sem_NA, MAF < 0.01)
+comuns <- subset(frq_sem_NA, MAF > 0.05)
+
+
+write.xlsx(raras, "variantes_raras.xlsx")
+write.xlsx(comuns, "variantes_comunes.xlsx")
+
+
+
+frq_sem_NA$Category <- cut(frq_sem_NA$MAF,
+                          breaks = c(-Inf,0.001,0.01,Inf),
+                          labels = c("very rare", "rare", "common"))
